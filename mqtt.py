@@ -1,10 +1,11 @@
+import asyncio
 import datetime
 
 import paho.mqtt.client as mqtt
 
 
 class MQTTConnection:
-    def __init__(self, debug = False):
+    def __init__(self, debug=False):
         from config import MQTT_USER, MQTT_PASSWORD, MQTT_HOST, MQTT_PORT
         self.on_message_callbacks= [self.log_message]
         self.client = mqtt.Client("Discord Bot")

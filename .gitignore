@@ -2,3 +2,5 @@ secrets.py
 
 env/
 venv/
+
+.env
