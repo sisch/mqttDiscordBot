@@ -1,0 +1,13 @@
+[Unit]
+Description=Starts discord bot that reads discord messages and publishes predefined topics to an mqtt broker
+After=network.target
+
+[Service]
+Type=simple
+Restart=on-failure
+WorkingDirectory=/home/pi/Services/mqttDiscordBot/
+User=pi
+ExecStart=/home/pi/Services/mqttDiscordBot/env/bin/python /home/pi/Services/mqttDiscordBot/bot.py
+
+[Install]
+WantedBy=multi-user.target
