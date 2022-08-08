@@ -12,6 +12,7 @@ BMP180_DATA_TOPIC = "stat/office/temperature1/STATUS10"
 BMP180_POLL_TOPIC = "cmnd/office/temperature1/status"
 BMP180_POLL_PAYLOAD = "10"
 
+
 def create_configured_client():
     client = mqtt.Client("Mein Python MQTT Client")
     client.username_pw_set(username=MQTT_USER, password=MQTT_PASSWORD)

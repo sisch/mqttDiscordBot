@@ -7,7 +7,8 @@ import paho.mqtt.client as mqtt
 class MQTTConnection:
     def __init__(self, debug=False):
         from config import MQTT_USER, MQTT_PASSWORD, MQTT_HOST, MQTT_PORT
-        self.on_message_callbacks= [self.log_message]
+
+        self.on_message_callbacks = [self.log_message]
         self.client = mqtt.Client("Discord Bot")
         if MQTT_USER != "":
             self.client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
@@ -16,7 +17,9 @@ class MQTTConnection:
         self.client.on_message = self.on_message
 
     def log_message(self, topic, message):
-        self.debug_log(f"[{datetime.datetime.now()}] Topic: {topic}, Payload: {message}")
+        self.debug_log(
+            f"[{datetime.datetime.now()}] Topic: {topic}, Payload: {message}"
+        )
 
     def debug_log(self, message):
         if self.DEBUG:

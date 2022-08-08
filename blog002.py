@@ -1,5 +1,6 @@
 import discord
 import config
+
 client = discord.Client()
 
 
@@ -12,10 +13,11 @@ async def on_ready():
 async def on_message(message):
     if not message.content.startswith("!"):
         return
-    for command,reply in config.COMMANDS.items():
+    for command, reply in config.COMMANDS.items():
         if message.content.startswith(command):
             await message.channel.send(reply)
             return
     await message.channel.send(f"> {message.content}? \nDas habe ich nicht!")
+
 
 client.run(config.DISCORD_TOKEN)

@@ -51,7 +51,11 @@ async def on_message(message):
 
 
 async def print_help(channel):
-    response = "```\nAvailable Commands:\n" + "\n".join(f"!{c}" for c in config.COMMANDS.keys()) + "\n```"
+    response = (
+        "```\nAvailable Commands:\n"
+        + "\n".join(f"!{c}" for c in config.COMMANDS.keys())
+        + "\n```"
+    )
     await send_message(response, reply=True)
 
 
@@ -64,12 +68,17 @@ def check_user_or_role(author):
         author_role_ids = [role.id for role in author.roles]
         for req_role in config.DISCORD_ROLES_REQUIRED:
             if req_role not in author_role_ids:
-                print("a role is not in the author roles" + ",".join([role.name for role in author.roles]))
+                print(
+                    "a role is not in the author roles"
+                    + ",".join([role.name for role in author.roles])
+                )
                 return False
 
     elif len(config.DISCORD_ROLE_REQUIRED) > 0:
         author_role_ids = [role.id for role in author.roles]
-        if all(role_id not in config.DISCORD_ROLE_REQUIRED for role_id in author_role_ids):
+        if all(
+            role_id not in config.DISCORD_ROLE_REQUIRED for role_id in author_role_ids
+        ):
             return False
     return True
 
@@ -77,7 +86,7 @@ def check_user_or_role(author):
 async def run_command(message):
     for command, (topic, payload, feedback) in config.COMMANDS.items():
         if command in message.content:
-            arguments = message.content.replace("!"+command, "").lstrip()
+            arguments = message.content.replace("!" + command, "").lstrip()
             mqtt_connection.client.publish(topic, payload.format(value=arguments))
             if feedback != "" and feedback is not None:
                 await send_message(feedback, reply=True)
@@ -109,7 +118,7 @@ def start_both_async():
     discord_thread.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     setup_subscribers(mqtt_connection)
     start_both_async()
     while True:
