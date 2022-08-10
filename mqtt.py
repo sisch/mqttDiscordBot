@@ -3,6 +3,8 @@ import datetime
 
 import paho.mqtt.client as mqtt
 
+import config
+
 
 class MQTTConnection:
     def __init__(self, debug=False):
@@ -16,9 +18,9 @@ class MQTTConnection:
         self.DEBUG = debug
         self.client.on_message = self.on_message
 
-    def log_message(self, topic, message):
+    def log_message(self, message):
         self.debug_log(
-            f"[{datetime.datetime.now()}] Topic: {topic}, Payload: {message}"
+            f"[{datetime.datetime.now()}] {message}"
         )
 
     def debug_log(self, message):
@@ -30,8 +32,13 @@ class MQTTConnection:
             self.on_message_callbacks.append(func)
 
     def on_message(self, client, userdata, message):
+        topic = message.topic
+        payload = message.payload.decode("utf-8")
+        if topic in config.MQTT_SUBSCRIBERS.keys():
+            template, func = config.MQTT_SUBSCRIBERS[topic]
+            payload = template.format(value=func(topic, payload))
         for callback in self.on_message_callbacks:
-            callback(message.topic, message.payload)
+            callback(payload)
 
     def send_command(self, topic, payload, retain=False):
         self.client.publish(topic, payload, retain=retain)

@@ -10,22 +10,18 @@ import discord
 client = discord.Client()
 mqtt_connection = MQTTConnection(True)
 
-loop = asyncio.get_event_loop()
+
+def send_mqtt_to_discord(message, channel=None):
+    asyncio.run_coroutine_threadsafe(_send_mqtt_to_discord(message, channel), client.loop)
 
 
-def send_mqtt_to_discord(topic: str, payload: bytes):
-    payload = payload.decode("utf-8")
-    asyncio.run_coroutine_threadsafe(_send_mqtt_to_discord(topic, payload), client.loop)
-
-
-async def _send_mqtt_to_discord(topic: str, payload: str):
-    print(f"message for {topic} with payload {payload}.")
-    await send_message(config.PERMANENT_SUBSCRIBES[topic].format(value=payload))
+async def _send_mqtt_to_discord(message, channel=None):
+    await send_message(message, channel=channel)
 
 
 def setup_subscribers(connection):
     topics = list()
-    for topic in config.PERMANENT_SUBSCRIBES.keys():
+    for topic in config.MQTT_SUBSCRIBERS.keys():
         topics.append((topic, 1))
     mqtt_connection.client.subscribe(topics)
     print("subscribed to: " + ",".join([t[0] for t in topics]))
@@ -84,12 +80,12 @@ def check_user_or_role(author):
 
 
 async def run_command(message):
-    for command, (topic, payload, feedback) in config.COMMANDS.items():
+    for command, mqtt_commands in config.COMMANDS.items():
         if command in message.content:
-            arguments = message.content.replace("!" + command, "").lstrip()
-            mqtt_connection.client.publish(topic, payload.format(value=arguments))
-            if feedback != "" and feedback is not None:
-                await send_message(feedback, reply=True)
+            for (topic, payload, feedback) in mqtt_commands:
+                mqtt_connection.client.publish(topic, payload)
+                if feedback:
+                    await send_message(feedback, reply=True)
             return
 
 
@@ -106,11 +102,6 @@ async def send_message(message_string, reply=False, channel=None):
     await channel.send(message_string)
 
 
-def run_both_async():
-    loop.create_task(client.run(config.DISCORD_TOKEN))
-    loop.create_task(mqtt_connection.client.loop_forever())
-
-
 def start_both_async():
     mqtt_thread = Thread(mqtt_connection.client.loop_start())
     mqtt_thread.start()
@@ -121,5 +112,3 @@ def start_both_async():
 if __name__ == "__main__":
     setup_subscribers(mqtt_connection)
     start_both_async()
-    while True:
-        mqtt_connection.client.loop()
